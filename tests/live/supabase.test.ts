@@ -1,0 +1,22 @@
+import { test, before } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { parseEnv } from 'node:util';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+Object.assign(process.env,parseEnv(await readFile('.env.local','utf8')));
+const url=process.env.SUPABASE_URL??'',key=process.env.SUPABASE_PUBLISHABLE_KEY??'',ref=process.env.DEV_SUPABASE_PROJECT_REF;
+if(process.env.APP_ENV!=='development'||!ref||new URL(url).hostname!==`${ref}.supabase.co`||!key)throw new Error('Configura exclusivamente el proyecto Cloud de desarrollo antes de ejecutar test:live.');
+const A='10000000-0000-4000-8000-000000000001',B='10000000-0000-4000-8000-000000000002';
+function client(){return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});}
+const clients:Record<string,SupabaseClient>={};
+before(async()=>{for(const email of ['suacof','cloud9','admin','global','multi','inactivo']){const c=client();const {error}=await c.auth.signInWithPassword({email:`${email}@example.test`,password:'Local-Fixture-Only-2026!'});if(error)throw new Error('Login fixture falló. Verifica seed:users y proyecto DEV.');clients[email]=c;}});
+test('LIVE Supabase Auth accepts a valid login',async()=>{const {data,error}=await clients.suacof.auth.getUser();assert.equal(error,null);assert.equal(data.user?.email,'suacof@example.test');});
+test('LIVE Supabase Auth rejects invalid login',async()=>{const {error}=await client().auth.signInWithPassword({email:'suacof@example.test',password:'wrong-password'});assert.ok(error);});
+test('LIVE employee cannot read other company',async()=>{const {data,error}=await clients.suacof.from('companies').select('id').eq('id',B);assert.equal(error,null);assert.deepEqual(data,[]);});
+test('LIVE reverse company isolation',async()=>{const {data,error}=await clients.cloud9.from('companies').select('id').eq('id',A);assert.equal(error,null);assert.deepEqual(data,[]);});
+test('LIVE employee cannot read coworker',async()=>{const {data,error}=await clients.suacof.from('employees').select('display_name');assert.equal(error,null);assert.deepEqual(data,[{display_name:'Trabajador SUACOF'}]);});
+test('LIVE company admin cannot read or manage unassigned company',async()=>{const {data}=await clients.admin.from('companies').select('id').eq('id',B);assert.deepEqual(data,[]);const {error}=await clients.admin.rpc('deactivate_company',{p_company:B,p_version:1,p_reason:'Prueba negativa: no debe mutar'});assert.equal(error?.code,'42501');});
+test('LIVE different roles are assigned per company',async()=>{const {data,error}=await clients.multi.from('user_company_memberships').select('role_code,company_id').eq('user_id',(await clients.multi.auth.getUser()).data.user!.id).order('company_id');assert.equal(error,null);assert.deepEqual(data,[{role_code:'COMPANY_ADMIN',company_id:A},{role_code:'HR',company_id:B}]);});
+test('LIVE inactive membership blocks data',async()=>{const {data,error}=await clients.inactivo.from('companies').select('id');assert.equal(error,null);assert.deepEqual(data,[]);});
+test('LIVE direct company manipulation is denied',async()=>{const {error}=await clients.suacof.from('user_company_memberships').update({role_code:'ADMIN_GLOBAL'}).eq('company_id',A);assert.equal(error?.code,'42501');});
+test('LIVE audit rows cannot be updated or deleted by scoped administrator',async()=>{const {error}=await clients.global.from('audit_logs').update({action:'tamper'}).eq('company_id',A);assert.equal(error?.code,'42501');const {error:deleteError}=await clients.global.from('audit_logs').delete().eq('company_id',A);assert.equal(deleteError?.code,'42501');});

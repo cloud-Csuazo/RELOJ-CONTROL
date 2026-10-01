@@ -1,0 +1,10 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { activeMembership } from '../../src/modules/tenancy/domain/authorization';
+import { safeNext, loginSchema, profileSchema } from '../../src/shared/validation';
+import type { Membership } from '../../src/shared/types';
+const m:Membership={id:'m',company_id:'a',user_id:'u',role_code:'EMPLOYEE',status:'active',valid_from:'2026-01-01T00:00:00Z',valid_until:null,version:1};
+test('membership checks identity, tenant, state and time',()=>{const now=Date.parse('2026-10-01');assert.equal(activeMembership(m,'u','a',now),true);assert.equal(activeMembership(m,'other','a',now),false);assert.equal(activeMembership(m,'u','b',now),false);assert.equal(activeMembership({...m,status:'inactive'},'u','a',now),false);assert.equal(activeMembership({...m,valid_until:'2026-09-01'},'u','a',now),false);});
+test('login validates email without accepting arbitrary payloads',()=>{assert.equal(loginSchema.safeParse({email:'no-email',password:'x'}).success,false);assert.equal(loginSchema.safeParse({email:'persona@example.test',password:'x'}).success,true);});
+test('profile payload cannot preserve role or identity injection',()=>{const p=profileSchema.parse({display_name:'Persona ficticia',locale:'es-CL',role:'ADMIN_GLOBAL',user_id:'fake'});assert.deepEqual(p,{display_name:'Persona ficticia',locale:'es-CL'});});
+test('return URLs reject external destinations and protocol-relative URLs',()=>{for(const path of ['https://evil.test','//evil.test','/\\evil.test','/admin'])assert.equal(safeNext(path),'/seleccionar-empresa');});
