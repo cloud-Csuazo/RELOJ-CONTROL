@@ -1,8 +1,8 @@
 # GitHub RELOJ-CONTROL
 
-Destino indicado por el usuario: https://github.com/cloud-Csuazo/RELOJ-CONTROL.git. El repositorio estaba vacío al comprobarlo. Git local usa rama main; no se versionan `.env.local`, dependencias, builds ni artefactos temporales. Las capturas y documentación sí forman parte de la entrega.
+Destino indicado por el usuario: https://github.com/cloud-Csuazo/RELOJ-CONTROL.git. El repositorio estaba vacío al comprobarlo. La entrega se publicó exitosamente en main. Git local usa esa rama; no se versionan `.env.local`, dependencias, builds ni artefactos temporales. Las capturas y documentación sí forman parte de la entrega.
 
-Para publicar desde una terminal con Git instalado y autenticación GitHub disponible:
+Para publicar cambios futuros desde una terminal con Git instalado y autenticación GitHub disponible:
 
 ```sh
 git push -u origin main

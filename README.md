@@ -31,7 +31,7 @@ En Windows las pruebas de navegador utilizan Edge instalado; en otros sistemas e
 ## Archivos
 
 - `src/server`: sesiones, autorización, configuración y limitador.
-- `src/features`: autenticación y administración por empresa.
+- `src/modules`: autenticación y administración por empresa.
 - `src/app`: páginas, layouts y API protegida.
 - `src/proxy.ts`: renovación de cookies y política CSP.
 - `supabase/migrations`: cambios versionados de esquema y permisos.
