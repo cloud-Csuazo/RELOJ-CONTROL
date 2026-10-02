@@ -9,6 +9,11 @@ test('all public application tables have RLS enabled',async()=>{
   const result=await db.query<{relname:string;relrowsecurity:boolean}>("select relname,relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'");
   assert.equal(result.rows.length,8); assert.ok(result.rows.every(r=>r.relrowsecurity));
 });
+test('private limiter has RLS enabled',async()=>{
+  const result=await db.query<{relrowsecurity:boolean}>("select relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='private' and c.relname='auth_rate_limits'");
+  assert.equal(result.rows[0]?.relrowsecurity,true);
+});
+test('authenticated clients cannot read the private limiter directly',async()=>{await assert.rejects(asUser(db,U.employeeA,q=>q.query('select * from private.auth_rate_limits')),/permission denied/);});
 test('unauthenticated role cannot read companies',async()=>{await assert.rejects(asUser(db,null,q=>q.query('select * from public.companies'),'anon'),/permission denied/);});
 test('employee SUACOF cannot see CLOUD9 via known ID',async()=>{await asUser(db,U.employeeA,async q=>assert.equal((await q.query('select id from public.companies where id=$1',[B])).rows.length,0));});
 test('CLOUD9 employee cannot see SUACOF via known ID',async()=>{await asUser(db,U.employeeB,async q=>assert.equal((await q.query('select id from public.companies where id=$1',[A])).rows.length,0));});

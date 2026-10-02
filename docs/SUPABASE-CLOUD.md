@@ -6,7 +6,7 @@ En Supabase, crear una organización si aún no existe y un proyecto llamado, po
 
 ## 2. Instalar el esquema
 
-En SQL Editor del proyecto vacío, pegar y ejecutar el contenido completo de `supabase/development-setup.sql`. Este archivo combina las dos migraciones versionadas y el seed de empresas. Ejecutarlo una sola vez sobre una base vacía. Para regenerarlo: `pnpm cloud:sql`. No volver a ejecutar el instalador sobre una base ya instalada; futuros cambios se aplican como nuevas migraciones.
+En SQL Editor del proyecto vacío, pegar y ejecutar el contenido completo de `supabase/development-setup.sql`. Este archivo combina las tres migraciones versionadas y el seed de empresas. Ejecutarlo una sola vez sobre una base vacía. Para regenerarlo: `pnpm cloud:sql`. No volver a ejecutar el instalador sobre una base ya instalada; futuros cambios se aplican como nuevas migraciones.
 
 Se crean ocho tablas públicas de aplicación, todas con RLS, y el limitador privado. Supabase mantiene `auth.users`. No crear manualmente tablas equivalentes ni desactivar RLS para solucionar errores.
 

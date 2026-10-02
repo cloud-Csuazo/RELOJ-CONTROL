@@ -257,6 +257,15 @@ revoke all on function public.change_membership(uuid,uuid,text,text,integer,text
 grant execute on function public.change_membership(uuid,uuid,text,text,integer,text),public.deactivate_company(uuid,integer,text) to authenticated;
 commit;
 
+begin;
+
+-- Defense in depth: no client may access the internal limiter table directly.
+-- The service-role-only SECURITY DEFINER RPC operates as its owner.
+alter table private.auth_rate_limits enable row level security;
+revoke all on private.auth_rate_limits from public, anon, authenticated;
+
+commit;
+
 -- Fictional development records only. Never apply this seed to production.
 insert into public.companies(id,code,legal_name,display_name)
 values ('10000000-0000-4000-8000-000000000001','SUACOF','SUACOF Solutions SpA','SUACOF Solutions'),

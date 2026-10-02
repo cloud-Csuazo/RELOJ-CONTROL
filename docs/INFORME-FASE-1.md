@@ -50,13 +50,13 @@ La clave secreta se importa exclusivamente desde servidor para el limitador comp
 1. Supabase Cloud separado de desarrollo, por elección del usuario; Docker opcional y no utilizado.
 2. Gestión de privilegios sólo ADMIN_GLOBAL dentro de empresas asignadas, regla aprobada explícitamente. COMPANY_ADMIN conserva lectura administrativa.
 3. Claves API modernas publicable/secreta y variables de entorno sin secretos versionados.
-4. Fuente versionada de esquema en dos migraciones; instalador SQL sólo para un proyecto vacío ficticio.
+4. Fuente versionada de esquema en tres migraciones; instalador SQL sólo para un proyecto vacío ficticio.
 5. Código publicado en GitHub RELOJ-CONTROL, rama main. Publicación no despliega aplicación ni modifica Supabase.
 6. Sin nuevas funciones de Fase 2 hasta verificar las fundaciones contra el backend real.
 
 ## Validación
 
-- 36 pruebas unitarias/SQL aprobadas, cero omitidas. Incluyen empresas A/B, IDs conocidos, perfiles, trabajador propio/otro de su misma empresa y otra empresa, ADMIN_GLOBAL sólo asignado, roles distintos por empresa, membership inactiva/expirada/futura, escalamiento de privilegios, auditoría inalterable, RPC positivas y negativas, concurrencia, último administrador y limitador.
+- 38 pruebas unitarias/SQL aprobadas, cero omitidas. Incluyen empresas A/B, IDs conocidos, perfiles, trabajador propio/otro de su misma empresa y otra empresa, ADMIN_GLOBAL sólo asignado, roles distintos por empresa, membership inactiva/expirada/futura, escalamiento de privilegios, auditoría inalterable, RPC positivas y negativas, concurrencia, último administrador y limitador.
 - 10 pruebas de navegador aprobadas: login válido e inválido, selector, ingreso directo, manipulación de empresa, trabajador ajeno, administrador ajeno, inactivo, logout y recuperación con respuesta genérica. Doble de Auth exclusivo de pruebas; PostgreSQL ejecuta RLS real.
 - TypeScript, lint y compilación de producción aprobados.
 - Auditoría de dependencias de producción: no se encontraron vulnerabilidades conocidas en la revisión realizada.
