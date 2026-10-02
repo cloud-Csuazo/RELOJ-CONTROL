@@ -1,6 +1,6 @@
 # Informe de Fase 1
 
-Estado: implementación local validada; integración real con Supabase Cloud pendiente de configuración. No se inició Fase 2. No se confirma un número de trabajadores como requisito de dimensionamiento.
+Estado al 2 de octubre de 2026: implementación conectada a Supabase Cloud de desarrollo, con pruebas de Auth, RLS y navegador aprobadas. Recuperación por correo, renovación prolongada de sesión y preparación para producción siguen pendientes. No se inició Fase 2. No se confirma un número de trabajadores como requisito de dimensionamiento.
 
 ## Arquitectura y alcance
 
@@ -61,10 +61,11 @@ La clave secreta se importa exclusivamente desde servidor para el limitador comp
 - TypeScript, lint y compilación de producción aprobados.
 - Auditoría de dependencias de producción: no se encontraron vulnerabilidades conocidas en la revisión realizada.
 - Capturas escritorio/móvil en `screenshots/`; verificado sin desbordamiento horizontal a 390 px. Pantallas: login, selector, administración y portal trabajador.
-- Pruebas contra Supabase Cloud preparadas pero no ejecutadas; no hay proyecto ni secretos reales configurados en esta entrega.
+- Supabase Cloud de desarrollo conectado mediante `.env.local`, excluido de Git. Ocho cuentas ficticias creadas; diez pruebas directas de Auth/RLS y cinco pruebas de navegador Cloud aprobadas, sin omisiones. Login válido e inválido, aislamiento bidireccional, privacidad de trabajador, permisos administrativos, roles por empresa, memberships inactivas, escalamiento y auditoría protegida verificados contra el servicio real.
+- Registro público y acceso anónimo deshabilitados; confirmación de correo habilitada. No se copiaron secretos al código ni a la documentación.
 
 ## Riesgos y condiciones antes del piloto
 
 Comprobar Auth real, renovación, expiración y recuperación por correo con SMTP; revisar MFA de administradores; completar procedimiento de alta, baja y recuperación del último administrador; comprobar respaldos y restauración; revisar privilegios del equipo de infraestructura y protección de secretos. Medir disponibilidad, costos y volumen con uso real. Antes de asistencia formal se debe revisar la normativa aplicable y el proceso operacional; esta fase no declara cumplimiento legal automático ni calcula liquidaciones.
 
-La Fase 1 puede conectarse siguiendo `SUPABASE-CLOUD.md`. El cierre de integración depende de ejecutar las pruebas Cloud y resolver sus resultados. La arquitectura y RLS local no sustituyen esa comprobación.
+La integración Cloud básica está verificada. El cierre completo de Fase 1 depende de probar recuperación con entrega real de correo y los restantes escenarios de sesión. El SMTP y la validación de producción no se consideran resueltos por estas quince pruebas Cloud.

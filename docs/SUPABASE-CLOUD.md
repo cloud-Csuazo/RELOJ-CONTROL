@@ -62,7 +62,7 @@ pnpm test:live
 pnpm test:e2e:live
 ```
 
-Las pruebas Cloud rechazan entornos distintos de development y referencias de proyecto inconsistentes. No se ejecutaron aún: requieren tu proyecto configurado. Probar manualmente la recuperación con correo real, renovación de sesión, caducidad, reinicio del navegador y suspensión desde una segunda sesión. Restaurar fixtures sólo en el proyecto ficticio si se alteran durante pruebas.
+Las pruebas Cloud rechazan entornos distintos de development y referencias de proyecto inconsistentes. El 2 de octubre de 2026 pasaron las diez pruebas directas y las cinco de navegador en el proyecto de desarrollo conectado. Quedan por probar recuperación con correo real, renovación prolongada de sesión, caducidad y reinicio del navegador. Restaurar fixtures sólo en el proyecto ficticio si se alteran durante pruebas.
 
 ## 6. Otros entornos
 
