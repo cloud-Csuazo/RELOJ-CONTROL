@@ -1,6 +1,6 @@
 # Informe de Fase 1
 
-Estado al 2 de octubre de 2026: implementación conectada a Supabase Cloud de desarrollo, con pruebas de Auth, RLS y navegador aprobadas. Recuperación por correo, renovación prolongada de sesión y preparación para producción siguen pendientes. No se inició Fase 2. No se confirma un número de trabajadores como requisito de dimensionamiento.
+Estado al 2 de octubre de 2026: implementación conectada a Supabase Cloud de desarrollo, con pruebas de Auth, RLS y navegador aprobadas. Recuperación por correo, renovación prolongada de sesión y preparación para producción siguen pendientes. Este informe describe la entrega inicial de Fundaciones; el estado operativo actual se documenta en AVANCE-DESARROLLO.md. No se confirma un número de trabajadores como requisito de dimensionamiento.
 
 ## Arquitectura y alcance
 
@@ -52,7 +52,7 @@ La clave secreta se importa exclusivamente desde servidor para el limitador comp
 3. Claves API modernas publicable/secreta y variables de entorno sin secretos versionados.
 4. Fuente versionada de esquema en tres migraciones; instalador SQL sólo para un proyecto vacío ficticio.
 5. Código publicado en GitHub RELOJ-CONTROL, rama main. Publicación no despliega aplicación ni modifica Supabase.
-6. Sin nuevas funciones de Fase 2 hasta verificar las fundaciones contra el backend real.
+6. La verificación real permitió continuar con personas, proyectos y asistencia según la nueva instrucción del usuario.
 
 ## Validación
 
@@ -69,3 +69,4 @@ La clave secreta se importa exclusivamente desde servidor para el limitador comp
 Comprobar Auth real, renovación, expiración y recuperación por correo con SMTP; revisar MFA de administradores; completar procedimiento de alta, baja y recuperación del último administrador; comprobar respaldos y restauración; revisar privilegios del equipo de infraestructura y protección de secretos. Medir disponibilidad, costos y volumen con uso real. Antes de asistencia formal se debe revisar la normativa aplicable y el proceso operacional; esta fase no declara cumplimiento legal automático ni calcula liquidaciones.
 
 La integración Cloud básica está verificada. El cierre completo de Fase 1 depende de probar recuperación con entrega real de correo y los restantes escenarios de sesión. El SMTP y la validación de producción no se consideran resueltos por estas quince pruebas Cloud.
+

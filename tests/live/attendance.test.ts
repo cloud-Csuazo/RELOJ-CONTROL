@@ -1,0 +1,17 @@
+import {before,test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import {randomUUID} from 'node:crypto';
+import {createClient,type SupabaseClient} from '@supabase/supabase-js';
+Object.assign(process.env,parseEnv(await readFile('.env.local','utf8')));
+const url=process.env.SUPABASE_URL??'',ref=process.env.DEV_SUPABASE_PROJECT_REF;
+if(process.env.APP_ENV!=='development'||!ref||new URL(url).hostname!==`${ref}.supabase.co`)throw new Error('Sólo desarrollo');
+const A='10000000-0000-4000-8000-000000000001',B='10000000-0000-4000-8000-000000000002';
+let worker:SupabaseClient,admin:SupabaseClient,foreign:SupabaseClient;
+before(async()=>{[worker,admin,foreign]=await Promise.all(['colega','admin','cloud9'].map(async name=>{const c=createClient(url,process.env.SUPABASE_PUBLISHABLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false}});assert.equal((await c.auth.signInWithPassword({email:`${name}@example.test`,password:'Local-Fixture-Only-2026!'})).error,null);return c;}));});
+let eventId:string;
+const payload=(kind:string)=>({event_type:kind,project_id:null,timestamp_device:new Date().toISOString(),latitude:null,longitude:null,gps_accuracy:null,offline:false,user_agent:'Prueba ficticia',device_info:'Integración'});
+test('LIVE same id submitted concurrently writes only one mark',async()=>{const id=randomUUID(),data=payload('CLOCK_IN');const results=await Promise.all(Array.from({length:4},()=>worker.rpc('record_attendance',{p_company:A,p_client_id:id,p_data:data})));for(const result of results)assert.equal(result.error,null);eventId=results[0].data;assert.ok(results.every(r=>r.data===eventId));assert.equal((await worker.from('attendance_events').select('id').eq('client_id',id)).data?.length,1);});
+test('LIVE colleague events stay invisible to foreign tenant and cannot be deleted',async()=>{assert.deepEqual((await foreign.from('attendance_events').select('id').eq('id',eventId)).data,[]);assert.equal((await worker.from('attendance_events').delete().eq('id',eventId)).error?.code,'42501');assert.equal((await worker.rpc('record_attendance',{p_company:B,p_client_id:randomUUID(),p_data:payload('CLOCK_IN')})).error?.code,'42501');});
+test('LIVE state transitions complete without changing original event',async()=>{for(const kind of ['BREAK_START','BREAK_END','CLOCK_OUT'])assert.equal((await worker.rpc('record_attendance',{p_company:A,p_client_id:randomUUID(),p_data:payload(kind)})).error,null);const event=await worker.from('attendance_events').select('timestamp_server,event_type').eq('id',eventId).single();assert.equal(event.data?.event_type,'CLOCK_IN');const changed=new Date(Date.parse(event.data!.timestamp_server)-1000).toISOString();const correction=await worker.rpc('request_attendance_correction',{p_company:A,p_event:eventId,p_timestamp:changed,p_reason:'Corrección ficticia de prueba'});assert.equal(correction.error,null);assert.equal((await admin.rpc('review_attendance_correction',{p_company:A,p_id:correction.data,p_approve:true,p_reason:'Revisión ficticia de prueba'})).error,null);assert.equal((await worker.from('attendance_events').select('timestamp_server').eq('id',eventId).single()).data?.timestamp_server,event.data!.timestamp_server);});

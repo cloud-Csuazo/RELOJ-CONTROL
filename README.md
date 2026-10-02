@@ -1,6 +1,6 @@
-# RELOJ-CONTROL — Fase 1
+# RELOJ-CONTROL
 
-Fundaciones de una aplicación multiempresa para SUACOF Solutions SpA y CLOUD 9 SpA. Nombre visual provisional: Nexo Laboral. No incluye todavía asistencia, remuneraciones ni liquidaciones.
+Fundaciones de una aplicación multiempresa para SUACOF Solutions SpA y CLOUD 9 SpA. Nombre visual provisional: Nexo Laboral. Personas, proyectos y asistencia disponibles en desarrollo. Novedades en validación; remuneraciones y liquidaciones continúan en construcción. Consulta docs/AVANCE-DESARROLLO.md.
 
 Next.js, TypeScript, Tailwind, Supabase Auth y PostgreSQL con RLS. Una identidad puede tener distintos roles en empresas diferentes. Cada consulta normal utiliza la sesión del usuario; la clave secreta del servidor se reserva al limitador de intentos y al script explícito de datos ficticios.
 
@@ -41,4 +41,5 @@ En Windows las pruebas de navegador utilizan Edge instalado; en otros sistemas e
 - `docs/INFORME-FASE-1.md`: arquitectura, decisiones, alcance, resultados y pendientes.
 - `docs/GITHUB.md`: publicación del código.
 
-Los comandos `db:start/reset/stop` son una alternativa futura con Docker; no forman parte del flujo Cloud elegido. No hay despliegue ni aplicación automática de migraciones. Detener el desarrollo funcional antes de Fase 2 hasta validar la integración real.
+Los comandos `db:start/reset/stop` son una alternativa futura con Docker; no forman parte del flujo Cloud elegido. No hay despliegue ni aplicación automática de migraciones. La integración real fue validada; el desarrollo continúa por autorización del usuario del 2 de octubre de 2026.
+

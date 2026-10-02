@@ -1,0 +1,6 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {validRut,normalizeRut,workforceData} from '../../src/modules/workforce/domain';
+test('RUT verifier normalizes punctuation and rejects invalid check digits',()=>{assert.equal(normalizeRut('12.345.678-5'),'12345678-5');assert.ok(validRut('12.345.678-5'));assert.ok(!validRut('12345678-9'));assert.ok(!validRut('00000000-0'));assert.ok(!validRut('12345678'));});
+test('workforce validator strips privilege injection and accepts no account linkage',()=>{const value=workforceData.parse({kind:'employee',display_name:'Persona nueva',role_code:'ADMIN_GLOBAL',company_id:'forged'});assert.ok(!('role_code' in value));assert.ok(!('company_id' in value));assert.ok('user_id' in value&&value.user_id==='');});
+test('contract money must be an integer string within supported bounds',()=>{const contract={kind:'contract',employee_id:'30000000-0000-4000-8000-000000000001',contract_type:'indefinite',job_title:'Técnico',starts_on:'2026-10-02',weekly_minutes:2400,base_salary:'1000000'};assert.ok(workforceData.safeParse(contract).success);assert.ok(!workforceData.safeParse({...contract,base_salary:'0.1'}).success);assert.ok(!workforceData.safeParse({...contract,base_salary:'999999999999'}).success);});

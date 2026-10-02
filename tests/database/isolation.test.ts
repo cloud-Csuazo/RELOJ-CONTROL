@@ -7,7 +7,7 @@ before(async()=>{db=await database();});
 after(async()=>{await db?.close();});
 test('all public application tables have RLS enabled',async()=>{
   const result=await db.query<{relname:string;relrowsecurity:boolean}>("select relname,relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r'");
-  assert.equal(result.rows.length,8); assert.ok(result.rows.every(r=>r.relrowsecurity));
+  assert.ok(result.rows.length>=8); assert.ok(result.rows.every(r=>r.relrowsecurity));
 });
 test('private limiter has RLS enabled',async()=>{
   const result=await db.query<{relrowsecurity:boolean}>("select relrowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='private' and c.relname='auth_rate_limits'");

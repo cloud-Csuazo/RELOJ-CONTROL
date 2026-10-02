@@ -1,0 +1,17 @@
+import {before,test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {parseEnv} from 'node:util';
+import {randomUUID} from 'node:crypto';
+import {createClient,type SupabaseClient} from '@supabase/supabase-js';
+Object.assign(process.env,parseEnv(await readFile('.env.local','utf8')));
+const url=process.env.SUPABASE_URL??'',ref=process.env.DEV_SUPABASE_PROJECT_REF;
+if(process.env.APP_ENV!=='development'||!ref||new URL(url).hostname!==`${ref}.supabase.co`)throw new Error('Sólo desarrollo');
+const A='10000000-0000-4000-8000-000000000001',B='10000000-0000-4000-8000-000000000002';
+let admin:SupabaseClient,worker:SupabaseClient,foreign:SupabaseClient;let employeeId:string;
+before(async()=>{const clients=await Promise.all(['admin','suacof','cloud9'].map(async name=>{const c=createClient(url,process.env.SUPABASE_PUBLISHABLE_KEY!,{auth:{persistSession:false,autoRefreshToken:false}});const {error}=await c.auth.signInWithPassword({email:`${name}@example.test`,password:'Local-Fixture-Only-2026!'});assert.equal(error,null);return c;}));[admin,worker,foreign]=clients;});
+test('LIVE workforce creates a separate employment relationship and audit',async()=>{const {data,error}=await admin.rpc('save_workforce',{p_company:A,p_kind:'employee',p_id:null,p_version:1,p_data:{display_name:`QA ficticio ${randomUUID().slice(0,8)}`,status:'inactive',job_title:'Prueba técnica',hired_on:'2026-10-02'},p_reason:'Alta ficticia de integración automatizada'});assert.equal(error,null);assert.equal(typeof data,'string');employeeId=data;const result=await admin.from('employees').select('user_id,status').eq('id',employeeId).single();assert.equal(result.error,null);assert.equal(result.data?.user_id,null);assert.equal(result.data?.status,'inactive');});
+test('LIVE worker and foreign worker cannot read newly created coworker',async()=>{for(const c of [worker,foreign]){const {data,error}=await c.from('employees').select('id').eq('id',employeeId);assert.equal(error,null);assert.deepEqual(data,[]);}});
+test('LIVE project creation in another tenant is denied',async()=>{const {error}=await admin.rpc('save_workforce',{p_company:B,p_kind:'project',p_id:null,p_version:1,p_data:{code:'QA-DENIED',name:'No debe crearse'},p_reason:'Prueba negativa de aislamiento'});assert.equal(error?.code,'42501');});
+test('LIVE direct worker changes remain denied',async()=>{const {error}=await admin.from('employees').update({status:'active'}).eq('id',employeeId);assert.equal(error?.code,'42501');});
+test('LIVE historical contract is immutable and can be ended with audit',async()=>{const {data,error}=await admin.rpc('save_workforce',{p_company:A,p_kind:'contract',p_id:null,p_version:1,p_data:{employee_id:employeeId,contract_type:'fixed_term',job_title:'Prueba técnica',starts_on:'2026-10-02',weekly_minutes:2400,base_salary:'900000'},p_reason:'Contrato ficticio de integración'});assert.equal(error,null);const ended=await admin.rpc('end_workforce_history',{p_company:A,p_kind:'contract',p_id:data,p_version:1,p_ends_on:'2026-10-31',p_reason:'Finalización ficticia de integración'});assert.equal(ended.error,null);const again=await admin.rpc('end_workforce_history',{p_company:A,p_kind:'contract',p_id:data,p_version:2,p_ends_on:'2026-11-30',p_reason:'No puede sobrescribir histórico'});assert.equal(again.error?.code,'23514');});

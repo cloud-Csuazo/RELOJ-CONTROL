@@ -27,7 +27,7 @@ export function Shell({ company, membership, profile, section, children }: { com
     <div className="app-main">
       <header className="topbar"><span className="topbar-company"><Building2 size={17}/>{company.legal_name}</span><div className="account"><span className="avatar">{name.slice(0,1).toUpperCase()}</span><span>{name}<small>{membership.role_code.replaceAll('_',' ')}</small></span><form action={logout}><button className="icon-button" aria-label="Cerrar sesión" title="Cerrar sesión"><LogOut size={18}/></button></form></div></header>
       <main id="contenido" className="workspace">{children}</main>
-      <footer className="app-footer">Nexo Laboral · Fundaciones<span>{company.currency} · {company.timezone}</span></footer>
+      <footer className="app-footer">Nexo Laboral<span>{company.currency} · {company.timezone}</span></footer>
     </div>
   </div>;
 }

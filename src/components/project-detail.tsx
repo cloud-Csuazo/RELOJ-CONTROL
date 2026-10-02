@@ -1,0 +1,15 @@
+import {companyContext} from '@/server/authorization';
+import {Card,AccessDeniedView} from './ui';
+import {RecordForm} from './record-form';
+export async function ProjectDetail({companyId,projectId}:{companyId:string;projectId:string}){
+ const c=await companyContext(companyId);
+ const [project,centers,locations,permission]=await Promise.all([
+ c.client.from('projects').select('id,code,name,client_name,description,starts_on,ends_on,cost_center_id,status,version').eq('company_id',companyId).eq('id',projectId).maybeSingle(),
+ c.client.from('cost_centers').select('id,name').eq('company_id',companyId).order('name').limit(100),
+ c.client.from('project_locations').select('id,name,address,latitude,longitude,radius_meters').eq('company_id',companyId).eq('project_id',projectId),
+ c.client.from('role_permissions').select('permission_code').eq('role_code',c.membership.role_code).eq('permission_code','workforce.manage').maybeSingle()
+ ]);
+ if([project,centers,locations,permission].some(r=>r.error))throw new Error('PROJECT_UNAVAILABLE');
+ if(!project.data)return <AccessDeniedView/>;
+ const p=project.data;return <><Card><h2>{p.name}</h2><p>{p.code} · {p.client_name||'Sin cliente'} · {p.status}</p><p>{p.description}</p>{permission.data&&<details><summary>Editar proyecto</summary><RecordForm companyId={companyId} kind="project" id={p.id} version={p.version} fields={[{name:'code',label:'Código',required:true,value:p.code},{name:'name',label:'Nombre',required:true,value:p.name},{name:'client_name',label:'Cliente',value:p.client_name},{name:'description',label:'Descripción',type:'textarea',value:p.description},{name:'starts_on',label:'Inicio',type:'date',value:p.starts_on??''},{name:'ends_on',label:'Término',type:'date',value:p.ends_on??''},{name:'cost_center_id',label:'Centro de costo',value:p.cost_center_id??'',options:[{value:'',label:'Sin centro de costo'},...(centers.data??[]).map(x=>({value:x.id,label:x.name}))]},{name:'status',label:'Estado',value:p.status,options:[{value:'active',label:'Activo'},{value:'inactive',label:'Inactivo'},{value:'completed',label:'Finalizado'}]}]}/></details>}</Card><Card className="mt-6"><h2>Ubicaciones esperadas</h2><p className="muted">Se utilizan al marcar asistencia. No se realiza seguimiento permanente.</p>{locations.data?.length?locations.data.map(l=><div key={l.id}><h3>{l.name}</h3><p>{l.address} · {l.latitude}, {l.longitude} · Radio {l.radius_meters} m</p></div>):<p>No hay ubicaciones registradas.</p>}{permission.data&&<details><summary>Registrar ubicación</summary><RecordForm companyId={companyId} kind="location" fields={[{name:'project_id',label:'Proyecto',options:[{value:projectId,label:p.name}]},{name:'name',label:'Nombre de ubicación',required:true},{name:'address',label:'Dirección',maxLength:300},{name:'latitude',label:'Latitud',type:'number',required:true},{name:'longitude',label:'Longitud',type:'number',required:true},{name:'radius_meters',label:'Radio esperado en metros',type:'number',required:true,value:200}]}/></details>}</Card></>;
+}
